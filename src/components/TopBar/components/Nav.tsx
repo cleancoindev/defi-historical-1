@@ -15,6 +15,9 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/sushiswap">
         Sushiswap
       </StyledLink>
+      <StyledLink exact activeClassName="active" to="/lpposition">
+        Lp Position
+      </StyledLink>
       {/* <StyledLink exact activeClassName="active" to="/swap">
         Swap
       </StyledLink>

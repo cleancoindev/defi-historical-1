@@ -11,13 +11,11 @@ import './App.css';
 import DashBoard from "./views/DashBoard/DashBoard";
 import Sushiswap from "./views/Sushiswap/Sushiswap";
 import Home from "./views/Home/Home";
-
+import LpPosition from "./views/LpPosition/LpPosition";
 
 import ModalsProvider from './contexts/Modals'
 import 'react-calendar/dist/Calendar.css';
 import Container from '@material-ui/core/Container';
-
-
 
 function App() {
   const [mobileMenu, setMobileMenu] = useState(false)
@@ -45,6 +43,9 @@ function App() {
             </Route>
             <Route path="/sushiswap" exact>
               <Sushiswap/>
+            </Route>
+            <Route path="/lpposition" exact>
+              <LpPosition/>
             </Route>
           </Switch>
         </Router>

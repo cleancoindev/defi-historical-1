@@ -8,9 +8,6 @@ import BigNumber from 'bignumber.js';
 const useROI = () => {
     const handleROI = useCallback(async (_pairAddress: string, time: string, amount:  string, currentTime: string) => {
         try {
-
-            // console.log("Time:", time, currentTime)
-
             // past time pair data
             const result0 = await uniswapClient.query({
                 query: UNI_TICKER_GET_MONTH,
