@@ -22,10 +22,11 @@ query users($id: Bytes!) {
 `
 
 export const UNI_MINT_TXS = gql`
-query mints($to: Bytes!) {
+query mints($to: Bytes!, $pairAddress: Bytes!) {
     mints (
         where: {
-            to: $to
+            to: $to,
+            pair: $pairAddress
         }) 
     {
         id
@@ -41,16 +42,21 @@ query mints($to: Bytes!) {
 `
 
 export const UNI_BURN_TXS = gql`
-query burns($sender: Bytes!) {
+query burns($sender: Bytes!, $pairAddress: Bytes!) {
     burns (
         where: {
-            sender: $sender
+            sender: $sender,
+            pair: $pairAddress
         }) 
     {
         id
         sender
         to
         liquidity
+        amountUSD
+        pair{
+            id
+        }
     }
   }
 `

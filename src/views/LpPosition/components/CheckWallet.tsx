@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js'
 import React, { useState, useCallback, useEffect } from 'react'
 import useROIForLP from "../../../hooks/useROIForLP"
+import useROI from "../../../hooks/useROI"
 import { withStyles, Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import {Line} from 'react-chartjs-2'
 import Container from '@material-ui/core/Container';
@@ -171,6 +172,7 @@ const useStyles2 = makeStyles({
 const CheckWallet: React.FC = () => {
   const classes = useStyles();
   const { onROILP } = useROIForLP()
+  const {onROI} = useROI()
 
   const [walletAddress, setWalletAddress] = useState('')
   const handleChangeWalletAddress = useCallback(
@@ -182,22 +184,98 @@ const CheckWallet: React.FC = () => {
   const handleSubmitChange = useCallback(async () => {
     try {
       const _currentTimeStamp = await getCurrentTimeSTamp()
-      const result = await uniswapClient.query({
-        query: UNI_MINT_TXS,
+
+      const result0 = await uniswapClient.query({
+        query: UNI_TO_GET_ALL_LP_POSITIONS,
         variables: {
-            to: walletAddress
+            id: walletAddress
         },
         fetchPolicy: "cache-first",
       });
-      let resultROI = await onROILP(
-        result.data.mints[0].pair.id, 
-        result.data.mints[0].amountUSD,
-        result.data.mints[0].liquidity,  
-        (_currentTimeStamp).toString()
-      )
+
+      console.log(result0)
+
+      for(let k=0; k<result0.data.users[0].liquidityPositions.length; k++)
+      {
+
+      // Mint
+        const result = await uniswapClient.query({
+          query: UNI_MINT_TXS,
+          variables: {
+              to: walletAddress,
+              pairAddress: result0.data.users[0].liquidityPositions[k].pair.id
+          },
+          fetchPolicy: "cache-first",
+        });
+
+        let totalMint: number = 0
+        let totalLiquidityMint: number = 0
+        let pastPriceMint: number = 0
+        for (let i=0; i<result.data.mints.length; i++) {
+          let resultROI = await onROILP(
+            result.data.mints[i].pair.id, 
+            result.data.mints[i].amountUSD,
+            result.data.mints[i].liquidity,  
+            (_currentTimeStamp).toString()
+          )
+          if (resultROI) {
+            totalMint = totalMint + resultROI.convertUserLptoCurrentPrice.toNumber()
+            totalLiquidityMint = totalLiquidityMint + new BigNumber(result.data.mints[i].liquidity).toNumber() 
+            pastPriceMint = pastPriceMint + new BigNumber(result.data.mints[i].amountUSD).toNumber() 
+            console.log('MintResult: ', i, resultROI.convertUserLptoCurrentPrice.toNumber())
+          }
+        }
+        console.log('totalMint: ', totalMint, totalLiquidityMint)
+
+        // Burn
+        const result1 = await uniswapClient.query({
+          query: UNI_BURN_TXS,
+          variables: {
+              sender: walletAddress,
+              pairAddress: result0.data.users[0].liquidityPositions[k].pair.id
+          },
+          fetchPolicy: "cache-first",
+        });
+
+        let totalBurn: number = 0
+        let totalLiquidityBurn: number = 0
+        let pastPriceBurn: number = 0
+        for (let i=0; i<result1.data.burns.length; i++) {
+          let resultROI = await onROILP(
+            result1.data.burns[i].pair.id, 
+            result1.data.burns[i].amountUSD,
+            result1.data.burns[i].liquidity,  
+            (_currentTimeStamp).toString()
+          )
+          if (resultROI) {
+            totalBurn = totalBurn + resultROI.convertUserLptoCurrentPrice.toNumber()
+            totalLiquidityBurn = totalLiquidityBurn + new BigNumber(result1.data.burns[i].liquidity).toNumber() 
+            pastPriceBurn = pastPriceBurn + new BigNumber(result1.data.burns[i].amountUSD).toNumber() 
+            console.log('BurnResult: ', i, resultROI.convertUserLptoCurrentPrice.toNumber())
+          }
+        }
+        console.log('totalBurn: ', totalBurn, totalLiquidityBurn)
+
+        if (totalMint > 0) {
+          pastPriceMint = pastPriceMint - pastPriceBurn
+          totalMint = totalMint - totalBurn
+          totalLiquidityMint = totalLiquidityMint - totalLiquidityBurn
+        }
+
+        
+        let ROI = new BigNumber(totalMint).
+        multipliedBy(new BigNumber(100)).
+        div(new BigNumber(pastPriceMint)).minus(100)
+
+        // let resultDetails = await onROI(result0.data.users[0].liquidityPositions[k].pair.id, (_currentTimeStamp-7776000).toString(), totalLiquidityMint.toString(), _currentTimeStamp.toString())
+
+        console.log('totalLiquidityFinalMint: ', totalLiquidityMint, ROI+"%")
+      }
+
+
+
       // const handleROILP = useCallback(async (_pairAddress: string, _price: string, _lp: string, currentTime: string) => {
 
-      console.log('result0: ', resultROI)
     } catch (e) {
       console.log(e)
     }

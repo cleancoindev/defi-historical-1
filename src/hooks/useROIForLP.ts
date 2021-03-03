@@ -55,11 +55,14 @@ const useROIForLP = () => {
                     multipliedBy(new BigNumber(result1.data.pairDayDatas[0].reserveUSD)).
                     div(new BigNumber(result1.data.pairDayDatas[0].totalSupply))
 
-                ROI = new BigNumber(convertUserLptoCurrentPrice).
-                    multipliedBy(new BigNumber(100)).
-                    div(new BigNumber(_price)).minus(100)
-
-                console.log("ROIROI: ", ROI.toNumber(), convertUserLptoCurrentPrice.toNumber(), _price)
+                // ROI = new BigNumber(convertUserLptoCurrentPrice).
+                //     multipliedBy(new BigNumber(100)).
+                //     div(new BigNumber(_price)).minus(100)
+                console.log("ROIROI: ", 
+                    // ROI.toNumber(), 
+                    convertUserLptoCurrentPrice.toNumber()
+                    // , _price
+                )
 
                 // convertUserLpToToken0PastTime = new BigNumber(convertUserAmountInLp).
                 //     multipliedBy(new BigNumber(result0.data.pairDayDatas[0].reserve0)).
@@ -105,7 +108,8 @@ const useROIForLP = () => {
                 // }
             // }
             return {
-                ROI, 
+                // ROI, 
+                convertUserLptoCurrentPrice
                 // token0AssetChange, 
                 // token1AssetChange, 
                 // convertUserLpToToken0, 
